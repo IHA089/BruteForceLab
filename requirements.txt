@@ -1,0 +1,4 @@
+
+Flask
+dnslib
+sqlite3; python_version >= "3.0"
