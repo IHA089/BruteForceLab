@@ -6,24 +6,52 @@ from dnslib.dns import QTYPE, RR, A
 import sqlite3
 import hashlib
 import threading
+import random
 import os
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
+lab_loc = "/AccountTakeover/BruteForceLab/"
+
 BruteForce = Flask(__name__)
 #app.secret_key = "vulnerable_lab by IHA089"
 
-def check_database():
-    pwd = os.getcwd()
-    path = pwd+"/users.db"
+def create_database():
+    db_path = os.getcwd()+lab_loc+'users.db'
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
 
-    if not os.path.isfile(path):
-        import setup_database
-        setup_database.create_database()
+    cursor.execute('''
+    CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        gmail TEXT NOT NULL,
+        username TEXT NOT NULL,
+        password TEXT NOT NULL
+    )
+    ''')
+
+    numb = random.randint(100, 999)
+    passw = "admin@"+str(numb)
+    passw_hash = hashlib.md5(passw.encode()).hexdigest()
+    query = "INSERT INTO users (gmail, username, password) VALUES ('admin@iha089.org', 'admin', '"+passw_hash+"')"
+
+    cursor.execute(query)
+
+    conn.commit()
+    conn.close()
+
+def check_database():
+    db_path = os.getcwd()+lab_loc+'users.db'
+    if not os.path.isfile(db_path):
+        create_database()
+
+
+check_database()
 
 def get_db_connection():
-    conn = sqlite3.connect('users.db')
+    db_path=os.getcwd()+lab_loc+'users.db'
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -140,8 +168,3 @@ def add_cache_control_headers(response):
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     return response
-
-def start_flask_server():
-    check_database()
-    app.run(host='127.0.0.1', port=7089, debug=False, use_reloader=False) 
-
