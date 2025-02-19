@@ -1,8 +1,6 @@
 import logging
 from flask import Flask, request, render_template, session, jsonify, redirect, url_for
 from functools import wraps
-from dnslib.server import DNSServer, DNSLogger
-from dnslib.dns import QTYPE, RR, A
 import sqlite3
 import hashlib
 import random
