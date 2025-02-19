@@ -5,7 +5,6 @@ from dnslib.server import DNSServer, DNSLogger
 from dnslib.dns import QTYPE, RR, A
 import sqlite3
 import hashlib
-import threading
 import random
 import os
 
@@ -15,7 +14,6 @@ log.setLevel(logging.ERROR)
 lab_loc = "/AccountTakeover/BruteForceLab/"
 
 BruteForce = Flask(__name__)
-#app.secret_key = "vulnerable_lab by IHA089"
 
 def create_database():
     db_path = os.getcwd()+lab_loc+'users.db'
@@ -35,9 +33,7 @@ def create_database():
     passw = "admin@"+str(numb)
     passw_hash = hashlib.md5(passw.encode()).hexdigest()
     query = "INSERT INTO users (gmail, username, password) VALUES ('admin@iha089.org', 'admin', '"+passw_hash+"')"
-
     cursor.execute(query)
-
     conn.commit()
     conn.close()
 
@@ -45,7 +41,6 @@ def check_database():
     db_path = os.getcwd()+lab_loc+'users.db'
     if not os.path.isfile(db_path):
         create_database()
-
 
 check_database()
 
@@ -91,7 +86,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-
 @BruteForce.route('/login', methods=['POST'])
 def login():
     username = request.form.get('username')
@@ -132,8 +126,7 @@ def join():
         except sqlite3.Error as err:
             error_message = "Something went wrong, Please try again later."
             return render_template('join.html', error=error_message)
-        conn.close()
-    
+        conn.close()  
 
 @BruteForce.route('/dashboard')
 @BruteForce.route("/dashboard.html")
@@ -160,7 +153,6 @@ def profile():
     if 'user' not in session:
         return redirect(url_for('login_html'))
     return render_template('profile.html', user=session.get('user'))
-
 
 @BruteForce.after_request
 def add_cache_control_headers(response):
