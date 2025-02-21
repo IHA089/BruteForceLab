@@ -9,12 +9,15 @@ import os
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
-lab_loc = "/AccountTakeover/BruteForceLab/"
+
+lab_type = "AccountTakeover"
+lab_name = "BruteForceLab"
+
 
 BruteForce = Flask(__name__)
 
 def create_database():
-    db_path = os.getcwd()+lab_loc+'users.db'
+    db_path = os.path.join(os.getcwd(), lab_type, lab_name, 'users.db')
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
@@ -36,14 +39,14 @@ def create_database():
     conn.close()
 
 def check_database():
-    db_path = os.getcwd()+lab_loc+'users.db'
+    db_path = os.path.join(os.getcwd(), lab_type, lab_name, 'users.db')
     if not os.path.isfile(db_path):
         create_database()
 
 check_database()
 
 def get_db_connection():
-    db_path=os.getcwd()+lab_loc+'users.db'
+    db_path=os.path.join(os.getcwd(), lab_type, lab_name, 'users.db')
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
