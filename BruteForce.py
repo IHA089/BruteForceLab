@@ -96,7 +96,7 @@ def login():
     conn = get_db_connection()
     cursor = conn.cursor()
     hash_password = hashlib.md5(password.encode()).hexdigest()
-    cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, hash_password))
+    cursor.execute("SELECT * FROM users WHERE username = ? or gmail = ? AND password = ?", (username, username, hash_password))
     user = cursor.fetchone()
     conn.close()
 
