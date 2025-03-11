@@ -35,7 +35,6 @@ def create_database():
 
     numb = random.randint(100, 999)
     passw = "admin@"+str(numb)
-    print(passw)
     passw_hash = hashlib.md5(passw.encode()).hexdigest()
     query = "INSERT INTO users (gmail, username, password, active, code) VALUES ('admin@iha089.org', 'admin', '"+passw_hash+"', '1', '45AEDF32')"
     cursor.execute(query)
