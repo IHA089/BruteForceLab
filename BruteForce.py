@@ -13,9 +13,15 @@ log.setLevel(logging.ERROR)
 lab_type = "AccountTakeover"
 lab_name = "BruteForceLab"
 
+flag_data = {}
 
 BruteForce = Flask(__name__)
 BruteForce.secret_key = "vulnerable_lab_by_IHA089"
+
+def generate_flag(length=10):
+    charset = string.ascii_letters + string.digits
+    random_string = ''.join(random.choices(charset, k=length))
+    return random_string
 
 def create_database():
     db_path = os.path.join(os.getcwd(), lab_type, lab_name, 'users.db')
@@ -81,6 +87,10 @@ def join_html():
 def acceptable_html():
     return render_template('acceptable.html', user=session.get('user'))
 
+@BruteForce.route('/check.html')
+def check_html():
+    return render_template('check.html')
+
 @BruteForce.route('/term.html')
 def term_html():
     return render_template('term.html', user=session.get('user'))
@@ -119,6 +129,22 @@ def confirm():
     error_message = "Invalid code"
     return render_template('confirm.html', error=error_message, username=username, password=password)
 
+@BruteForce.route('/check', methods=['POST'])
+def check():
+    session_code = request.form.get('sessioncode')
+    ss_code = []
+    if 'admin@iha089.org' in flag_data:
+        ss_code.append(flag_data['admin@iha089.org'])
+
+    if 'admin' in flag_data:
+        ss_code.append(flag_data['admin'])
+
+    if session_code in ss_code:
+        return render_template('success.html', user=session.get('user'))
+    else:
+        return render_template('check.html', error="wrong session code")
+
+
 @BruteForce.route('/resend', methods=['POST'])
 def resend():
     username = request.form.get('username')
@@ -140,7 +166,9 @@ def resend():
                 }
         try:
             k = requests.post(mail_server, json = payload)
-        except:
+            print(k.text)
+        except Exception as e:
+            print(e)
             return jsonify({"error": "Mail server is not responding"}), 500
         error_message="code sent"
     else:
@@ -217,11 +245,13 @@ def join():
 def dashboard():
     if 'user' not in session:
         return redirect(url_for('login_html'))
-    admin_list=['admin', 'administrator']
-    if session.get('user') in admin_list:
-        return render_template('admin-dashboard.html', user=session.get('user'))
+    username = session.get('user')
+    if username not in flag_data:
+        flag_data[username] = generate_flag()
 
-    return render_template('dashboard.html', user=session.get('user'))
+    flag_code = flag_data[username]
+
+    return render_template('dashboard.html', user=session.get('user'), flag=flag_code)
 
 @BruteForce.route('/logout.html')
 def logout():
