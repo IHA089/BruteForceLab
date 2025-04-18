@@ -4,11 +4,12 @@ from functools import wraps
 import sqlite3
 import hashlib
 import random, string
-import os, requests
+import os, requests, urllib3
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 lab_type = "AccountTakeover"
 lab_name = "BruteForceLab"
@@ -89,7 +90,7 @@ def acceptable_html():
 
 @BruteForce.route('/check.html')
 def check_html():
-    return render_template('check.html')
+    return render_template('check.html', user=session.get('user'))
 
 @BruteForce.route('/term.html')
 def term_html():
@@ -165,7 +166,7 @@ def resend():
                     "bodycontent":bdcontent
                 }
         try:
-            k = requests.post(mail_server, json = payload)
+            k = requests.post(mail_server, json = payload, verify=False)
             print(k.text)
         except Exception as e:
             print(e)
@@ -229,7 +230,7 @@ def join():
                         "bodycontent":bdcontent
                     }
             try:
-                k = requests.post(mail_server, json = payload)
+                k = requests.post(mail_server, json = payload, verify=False)
             except:
                 return jsonify({"error": "Mail server is not responding"}), 500
 
